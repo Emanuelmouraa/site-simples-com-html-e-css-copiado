@@ -1,0 +1,69 @@
+1. Atualizar os pacotes do sistema
+Execute o seguinte comando para atualizar os pacotes do sistema:
+
+bash
+Copiar
+Editar
+sudo apt update && sudo apt upgrade -y
+2. Instalar dependências necessárias
+Instale os pacotes exigidos para adicionar repositórios de terceiros e manipular chaves GPG:
+
+bash
+Copiar
+Editar
+sudo apt install -y wget gnupg apt-transport-https software-properties-common
+3. Adicionar a chave GPG oficial do Webmin
+Baixe e adicione a chave GPG do repositório oficial:
+
+bash
+Copiar
+Editar
+wget -qO - https://download.webmin.com/jcameron-key.asc | sudo gpg --dearmor -o /usr/share/keyrings/webmin.gpg
+4. Adicionar o repositório do Webmin
+Inclua o repositório do Webmin na lista de fontes do APT:
+
+bash
+Copiar
+Editar
+echo "deb [signed-by=/usr/share/keyrings/webmin.gpg] https://download.webmin.com/download/repository sarge contrib" | sudo tee /etc/apt/sources.list.d/webmin.list
+5. Atualizar a lista de pacotes
+Atualize a lista de pacotes com o novo repositório adicionado:
+
+bash
+Copiar
+Editar
+sudo apt update
+6. Instalar o Webmin
+Instale o Webmin com o seguinte comando:
+
+bash
+Copiar
+Editar
+sudo apt install -y webmin
+7. Verificar o status do serviço Webmin
+Após a instalação, verifique se o serviço está ativo e rodando:
+
+bash
+Copiar
+Editar
+sudo systemctl status webmin
+8. (Opcional) Liberar a porta 10000 no firewall
+Caso o firewall UFW esteja habilitado, libere a porta padrão do Webmin:
+
+bash
+Copiar
+Editar
+sudo ufw allow 10000/tcp
+sudo ufw reload
+9. Acessar o Webmin
+Após a instalação, o painel pode ser acessado via navegador, utilizando o IP do servidor:
+
+cpp
+Copiar
+Editar
+https://<IP_DO_SERVIDOR>:10000
+Nota: O acesso é feito via HTTPS. Caso apareça um aviso de certificado inseguro, é seguro prosseguir se estiver acessando localmente ou em ambiente controlado.
+
+10. Login inicial
+Utilize as credenciais do usuário administrador do sistema (por padrão, o usuário root ou qualquer outro com permissões sudo).
+
