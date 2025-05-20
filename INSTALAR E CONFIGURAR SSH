@@ -1,0 +1,100 @@
+🔐 Instalação e Configuração do SSH entre as Máquinas
+Este guia descreve como instalar e configurar o SSH entre duas máquinas Ubuntu, permitindo conexões seguras via terminal. O processo envolve troca de chaves e ajustes no arquivo de configuração do servidor SSH.
+
+1. Colocar ambas as máquinas na rede NAT
+🔁 Isso é necessário temporariamente para baixar os pacotes do repositório Ubuntu.
+
+Acesse as configurações da VM (VirtualBox ou VMware)
+
+Altere o tipo de rede para NAT em ambas as máquinas
+
+2. Atualizar os repositórios e instalar o OpenSSH
+Execute os comandos em ambas as máquinas:
+
+bash
+Copiar
+Editar
+sudo apt update && sudo apt upgrade -y
+sudo apt install openssh-server -y
+Verifique se o serviço está ativo:
+
+bash
+Copiar
+Editar
+sudo systemctl status ssh
+Caso esteja inativo, inicie o serviço:
+
+bash
+Copiar
+Editar
+sudo systemctl start ssh
+3. Retornar ambas as máquinas para a rede interna
+📡 Agora que o SSH está instalado, volte as máquinas para rede interna para permitir comunicação direta entre elas.
+
+Acesse as configurações da VM e mude o adaptador de rede de volta para rede interna
+
+4. Testar a conexão SSH entre as máquinas
+Na máquina A, tente se conectar à máquina B:
+
+bash
+Copiar
+Editar
+ssh usuario@ip_da_maquina_b
+E vice-versa:
+
+bash
+Copiar
+Editar
+ssh usuario@ip_da_maquina_a
+⚠️ Se você receber um erro de permissão ou usuário inexistente, será necessário cadastrar o usuário da máquina A na máquina B (e vice-versa).
+
+Criar usuários (se necessário):
+bash
+Copiar
+Editar
+sudo adduser nomedeusuario
+5. Configurar autenticação por chave SSH
+5.1. Gerar chave SSH em cada máquina (se ainda não tiver)
+bash
+Copiar
+Editar
+ssh-keygen
+Pressione Enter para aceitar os caminhos padrão. Isso criará as chaves em ~/.ssh/id_rsa e ~/.ssh/id_rsa.pub.
+
+5.2. Copiar a chave pública de uma máquina para a outra
+Na máquina A, copie a chave para a máquina B:
+
+bash
+Copiar
+Editar
+ssh-copy-id usuario@ip_da_maquina_b
+E vice-versa, da máquina B para a A:
+
+bash
+Copiar
+Editar
+ssh-copy-id usuario@ip_da_maquina_a
+6. Editar o arquivo de configuração do SSH (sshd_config)
+Abra o arquivo nas duas máquinas:
+
+bash
+Copiar
+Editar
+sudo nano /etc/ssh/sshd_config
+Verifique (ou edite) as seguintes diretivas para garantir:
+
+bash
+Copiar
+Editar
+PermitRootLogin no
+PasswordAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+⚠️ Se quiser desabilitar login por senha após configurar as chaves corretamente, mude PasswordAuthentication para no.
+
+Salve o arquivo e reinicie o serviço SSH:
+
+bash
+Copiar
+Editar
+sudo systemctl restart ssh
