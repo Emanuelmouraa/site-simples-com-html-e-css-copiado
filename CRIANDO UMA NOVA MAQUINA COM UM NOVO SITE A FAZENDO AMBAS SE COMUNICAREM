@@ -1,0 +1,140 @@
+Configuração de Ambiente com Dois Sites (IFRN e UFRN) em Máquinas Ubuntu
+Este repositório contém um passo a passo para criar duas máquinas Ubuntu com sites distintos (IFRN e UFRN), configurando a comunicação entre elas por meio de rede interna.
+
+📌 Pré-requisitos
+Duas máquinas virtuais com Ubuntu (sugestão: VirtualBox ou VMware)
+
+Acesso root ou permissões de superusuário (sudo)
+
+🖥️ Máquina 2 — Configuração do novo site (UFRN)
+1. Instalar o Ubuntu na nova VM
+Siga o procedimento padrão de instalação do Ubuntu Desktop ou Server.
+
+2. Atualizar o sistema
+bash
+Copiar
+Editar
+sudo apt update && sudo apt upgrade -y
+3. Instalar o Apache2
+bash
+Copiar
+Editar
+sudo apt install apache2 -y
+4. Criar a pasta para o novo site
+bash
+Copiar
+Editar
+sudo mkdir /var/www/ufrn
+5. Criar e editar o arquivo index.html
+bash
+Copiar
+Editar
+sudo nano /var/www/ufrn/index.html
+Exemplo de conteúdo:
+
+html
+Copiar
+Editar
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Site UFRN</title>
+</head>
+<body>
+    <h1>Bem-vindo ao site da UFRN!</h1>
+</body>
+</html>
+6. Criar e editar o novo arquivo de configuração do site
+bash
+Copiar
+Editar
+sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/ufrn.conf
+sudo nano /etc/apache2/sites-available/ufrn.conf
+Altere as linhas necessárias, por exemplo:
+
+apache
+Copiar
+Editar
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/ufrn
+    ServerName ufrn.local
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+7. Habilitar o novo site e reiniciar o Apache2
+bash
+Copiar
+Editar
+sudo a2ensite ufrn.conf
+sudo systemctl restart apache2
+8. Configurar IP estático e rede interna
+Altere o IP da máquina de DHCP para estático.
+
+Após isso, desligue a máquina.
+
+No VirtualBox/VMware, mude o adaptador de rede de NAT para rede interna.
+
+🖥️ Máquina 1 — Configuração de DNS e do site IFRN
+1. Copiar as configurações do site IFRN
+Caso já exista o site IFRN configurado, copie sua pasta e arquivos:
+
+bash
+Copiar
+Editar
+sudo cp -r /var/www/ifrn /var/www/ufrn
+2. Editar os arquivos copiados
+Altere todas as ocorrências de "ifrn" para "ufrn" nos arquivos de configuração do novo site, incluindo index.html.
+
+3. Configurar a nova zona DNS
+Edite o arquivo /etc/bind/named.conf.local:
+
+bash
+Copiar
+Editar
+sudo nano /etc/bind/named.conf.local
+Adicione a nova zona:
+
+bash
+Copiar
+Editar
+zone "ufrn.local" {
+    type master;
+    file "/etc/bind/db.ufrn";
+};
+4. Criar o arquivo de zona db.ufrn
+bash
+Copiar
+Editar
+sudo cp /etc/bind/db.ifrn /etc/bind/db.ufrn
+sudo nano /etc/bind/db.ufrn
+Altere todos os nomes de domínio e IPs conforme necessário para o domínio ufrn.local.
+
+5. Reinicie o BIND9
+bash
+Copiar
+Editar
+sudo systemctl restart bind9
+🌐 Testes de Comunicação
+Coloque a máquina 1 também na rede interna.
+
+Teste o acesso aos dois sites a partir de ambas as máquinas:
+
+bash
+Copiar
+Editar
+ping ifrn.local
+ping ufrn.local
+Abra os navegadores nas máquinas e acesse:
+
+arduino
+Copiar
+Editar
+http://ifrn.local
+http://ufrn.local
+✅ Resultado Esperado
+Ambas as máquinas se comunicam entre si via rede interna.
+
+Cada máquina consegue acessar os sites ifrn.local e ufrn.local.
+
+O Apache e o DNS estão corretamente configurados.
